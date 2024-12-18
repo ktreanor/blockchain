@@ -1,5 +1,4 @@
 from datetime import datetime
-from hashlib import sha256
 import block_utilities
 
 class Block:
@@ -26,6 +25,11 @@ class Block:
         self.__nonce = proof_of_work[0]
         self.__block_hash = proof_of_work[1]
         self.__timestamp = proof_of_work[2]
+
+    def __str__(self):
+        block_string = f'Block Number: \t{self.__block_number}\nData: \t{self.__data}'
+
+        return block_string
 
     @property
     def block_number(self) -> int:
