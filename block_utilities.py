@@ -27,3 +27,12 @@ def mine(*args) -> tuple:
         block_hash = sha256(mashed_block_with_nonce.encode("utf-8")).hexdigest()
 
     return nonce, block_hash, datetime.datetime.now().timestamp()
+
+def hash_block(*args) -> str:
+
+    mashed_block = ""
+
+    for arg in args:
+        mashed_block += str(arg)
+
+    return sha256(mashed_block.encode("utf-8")).hexdigest()
