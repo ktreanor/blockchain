@@ -11,12 +11,13 @@ class Block:
 
     def __init__(self, block_number: int, data: str, previous_hash: str) -> None:
         """
+        Creates a block instance, the block number, data, and the previous block's hash is needed
 
-        :param block_number:
-        :param data:
-        :param previous_hash:
+        :param block_number: The number of the new block being created
+        :param data: The data load of the block
+        :param previous_hash: The hash value of the previous block
         """
-
+        # TODO remove block number from block since this should always be the same as the index in the chain
         self.__block_number = block_number
         self.__data = data
         self.__previous_hash = previous_hash
@@ -25,11 +26,17 @@ class Block:
         self.__nonce = proof_of_work[0]
         self.__block_hash = proof_of_work[1]
         self.__timestamp = proof_of_work[2]
+        # TODO Do I actually need to store the hash in the block or should it be created each time?
 
     def __str__(self):
-        block_string = f'Block Number: \t{self.__block_number}\nData: \t{self.__data}'
-
-        return block_string
+        return (
+            f'Block Number: {self.__block_number}\n'
+            f'Previous Hash: {self.previous_hash}\n'
+            f'Data: {self.__data}\n'
+            f'Nonce: {self.__nonce}\n'
+            f'Hash: {self.__block_hash}\n'
+            f'Timestamp: {self.__timestamp}\n'
+        )
 
     @property
     def block_number(self) -> int:
@@ -73,15 +80,30 @@ class Block:
         """
         return self.__timestamp
 
+    def is_valid(self) -> bool:
+        """
+        Checks to see if the block is internally valid, meaning the hash of the block matches what is stored, and both are following the difficulty requirements
+        :return: Is the block internally valid
+        :rtype: bool
+        """
+
+        block_hash = block_utilities.hash_block(self.__block_number, self.__data, self.__previous_hash, self.__nonce)
+
+        # Insure the hashed block matches what is stored
+        if block_hash != self.__block_hash:
+            return False
+
+        # Insure the hash follows the defined difficulty
+        if block_hash[:block_utilities.DIFFICULTY] != block_utilities.PROOF * block_utilities.DIFFICULTY:
+            return False
+
+        return True
+
 def main():
     test_block = Block(0, "Genesis Block", "0" * 64)
 
-    print(f'Block Number: {test_block.block_number}')
-    print(f'Previous Hash: {test_block.previous_hash}')
-    print(f'Data: {test_block.data}')
-    print(f'Nonce: {test_block.nonce}')
-    print(f'Hash: {test_block.block_hash}')
-    print(f'Timestamp: {test_block.timestamp}')
+    print(test_block)
+    print(test_block.is_valid())
 
 if __name__ == "__main__":
     main()
