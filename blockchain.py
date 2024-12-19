@@ -83,28 +83,8 @@ class BlockChain:
         with open(file_name + '.dat', 'rb') as f:
             self.__chain = pickle.load(f)
 
-
 def main():
-    test_block_chain = BlockChain()
-
-    test_block_chain.append("Block Number 1")
-    test_block_chain.append("Block number 2")
-    test_block_chain.append("Block number 3")
-
-    #for block in test_block_chain:
-    #    print(block)
-
-    negative_validity_test(test_block_chain)
-
-def negative_validity_test(test_blockchain: BlockChain):
-    test_blockchain[2].data = "invalid data"
-    test_blockchain.refresh_chain()
-
-    for test_block in test_blockchain:
-        if test_block.valid:
-            print(test_block)
-        else:
-            print(f'\033[31m{test_block}\033[0m')
+    pass
 
 if __name__ == "__main__":
     main()

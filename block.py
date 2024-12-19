@@ -136,10 +136,7 @@ class Block:
         self.__timestamp = datetime.now().timestamp()
 
 def main():
-    test_block = Block(0, "Genesis Block", "0" * 64)
-
-    print(test_block)
-    print(f'Valid: {test_block.valid}')
+    pass
 
 if __name__ == "__main__":
     main()
