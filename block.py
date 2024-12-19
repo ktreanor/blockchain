@@ -1,12 +1,16 @@
 from datetime import datetime
-import block_utilities
+from hashlib import sha256
 
 class Block:
+
+    # Mining details
+    PROOF = "6"
+    DIFFICULTY = 4
 
     # Block header
     __index: int
     __previous_hash: str
-    __timestamp: datetime
+    __timestamp: float
     __nonce: int
 
     # Block payload
@@ -28,11 +32,7 @@ class Block:
         self.__data = data
         self.__previous_hash = previous_hash
 
-        proof_of_work = block_utilities.mine(index, data, previous_hash)
-        self.__nonce = proof_of_work[0]
-        self.__timestamp = proof_of_work[2]
-
-        # Note: The hash of the block is calculated each time it's needed, the only hash actually stored is the previous
+        self.__mine()
 
     def __str__(self) -> str:
         """
@@ -42,7 +42,7 @@ class Block:
         """
         return (
             f'Index: {self.__index}\n'
-            f'Previous Hash: {self.previous_hash}\n'
+            f'Previous Hash: {self.__previous_hash}\n'
             f'Data: {self.__data}\n'
             f'Nonce: {self.__nonce}\n'
             f'Hash: {self.hash}\n'
@@ -63,6 +63,16 @@ class Block:
         """
         return self.__data
 
+    @data.setter
+    def data(self, value):
+        """
+        This setter is used to validate of the blockchain, the block should be immutable
+        :param value:
+        :return:
+        """
+
+        self.__data = value
+
     @property
     def nonce(self) -> int:
         """
@@ -75,9 +85,8 @@ class Block:
         """
         Returns the block hash
         """
-
-        # The hash is calculated each time it's needed
-        return block_utilities.hash_block(self.__index, self.__data, self.__previous_hash, self.__nonce)
+        mashed_block = str(self.__index) + self.__data + self.__previous_hash + str(self.__nonce)
+        return sha256(mashed_block.encode("utf-8")).hexdigest()
 
     @property
     def previous_hash(self) -> str:
@@ -86,18 +95,51 @@ class Block:
         """
         return self.__previous_hash
 
+    @previous_hash.setter
+    def previous_hash(self, value):
+        self.__previous_hash = value
+
     @property
-    def timestamp(self) -> datetime:
+    def timestamp(self) -> float:
         """
         Returns the timestamp when the block was mined
         """
         return self.__timestamp
 
+    @property
+    def valid(self) -> bool:
+
+        return self.hash[:self.DIFFICULTY] == self.PROOF * self.DIFFICULTY
+
+    def __mine(self) -> None:
+        """
+        Mines the block, looks for the nonce that will allow the hash to meet the requirements established by the PROOF and DIFFICULTY constance.
+
+        PROOF - The character that must be prefixed in the hash
+
+        DIFFICULTY - How many of the PROOF characters much prefix the hash
+
+        :return: None
+        """
+        nonce = 1
+        mashed_data = str(self.__index) + self.__data + self.__previous_hash
+
+        mashed_block_with_nonce = mashed_data + str(nonce)
+        block_hash = sha256(mashed_block_with_nonce.encode("utf-8")).hexdigest()
+
+        while block_hash[:self.DIFFICULTY] != self.PROOF * self.DIFFICULTY:
+            nonce += 1
+            mashed_block_with_nonce = mashed_data + str(nonce)
+            block_hash = sha256(mashed_block_with_nonce.encode("utf-8")).hexdigest()
+
+        self.__nonce = nonce
+        self.__timestamp = datetime.now().timestamp()
 
 def main():
     test_block = Block(0, "Genesis Block", "0" * 64)
 
     print(test_block)
+    print(f'Valid: {test_block.valid}')
 
 if __name__ == "__main__":
     main()

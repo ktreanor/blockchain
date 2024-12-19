@@ -1,20 +1,18 @@
+import block
 from block import Block
 import pickle
 
 class BlockChain:
-    __chain = []
 
     def __init__(self):
-        pass
-
+        self.__chain = []
 
     def __iter__(self):
         """
         Dunder method to make the blockchain iterative
-        :return: None
         """
-        for block in self.__chain:
-            yield block
+        for temp_block in self.__chain:
+            yield temp_block
 
     def __getitem__(self, key: int) -> Block:
         """
@@ -28,7 +26,7 @@ class BlockChain:
 
     def __len__(self) -> int:
         """
-
+        Dunder method that allows users to use the len() function on the blockchain
         :return: Length of the blockchain
         """
         return len(self.__chain)
@@ -47,19 +45,25 @@ class BlockChain:
         if len(self.__chain) == 0:
             self.__append_genesis()
 
+        # Get the index and hash of the last block
         index = self.__chain[-1].index + 1
-        prev_hash = self.__chain[-1].block_hash
+        prev_hash = self.__chain[-1].hash
 
+        # Create a new block with the next index number, the included data, and the previous' block's hash
         new_block = Block(index, data, prev_hash)
+
+        # Add the new block to the chain
         self.__chain.append(new_block)
 
-    def validate(self):
+    def refresh_chain(self) -> None:
+        """
+        Runs through the blockchain updating the previous hash of every block.  This should be done often to insure the validity of the chain
+        """
+        previous_hash = "0" * 64
 
-        chain_valid = True
-
-        for index, block in enumerate(self.__chain):
-            if index != block.index:
-                chain_valid = False
+        for temp_block in self.__chain:
+            temp_block.previous_hash = previous_hash
+            previous_hash = temp_block.hash
 
     def save(self, file_name: str):
         """
@@ -83,23 +87,24 @@ class BlockChain:
 def main():
     test_block_chain = BlockChain()
 
-    """
     test_block_chain.append("Block Number 1")
     test_block_chain.append("Block number 2")
     test_block_chain.append("Block number 3")
 
-    test_block_chain.save('test_chain')
-    """
-    test_block_chain.read('test_chain')
+    #for block in test_block_chain:
+    #    print(block)
 
-    for block in test_block_chain:
-        print(block)
+    negative_validity_test(test_block_chain)
 
-    print(f'Blockchain Length {len(test_block_chain)}')
+def negative_validity_test(test_blockchain: BlockChain):
+    test_blockchain[2].data = "invalid data"
+    test_blockchain.refresh_chain()
 
-
-
-#    print(test_block_chain[0])
+    for test_block in test_blockchain:
+        if test_block.valid:
+            print(test_block)
+        else:
+            print(f'\033[31m{test_block}\033[0m')
 
 if __name__ == "__main__":
     main()
