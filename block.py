@@ -108,6 +108,10 @@ class Block:
 
     @property
     def valid(self) -> bool:
+        """
+        Check to see if the nonce saved creates a hash that obeys the difficulty rules
+        :return: True if the block is valid, false if not
+        """
 
         return self.hash[:self.DIFFICULTY] == self.PROOF * self.DIFFICULTY
 
